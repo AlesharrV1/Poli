@@ -1,6 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, TouchableOpacity, StyleSheet, Text ,Image } from "react-native";
-import MapView, { Callout, Marker, PROVIDER_GOOGLE, Region } from "react-native-maps";
+import { View, TouchableOpacity, StyleSheet, Text, Image } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import MapView, {
+  Callout,
+  Marker,
+  PROVIDER_GOOGLE,
+  Region,
+} from "react-native-maps";
 import * as Location from "expo-location";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -14,15 +20,17 @@ const Mapa = () => {
   const mapRef = useRef<MapView>(null);
   const params = useLocalSearchParams();
 
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [location, setLocation] = useState<Location.LocationObject | null>(
+    null
+  );
   const [region, setRegion] = useState<Region | null>(null); // Para detectar zoom
   const { puntos, setPuntos } = usePuntosStore();
-  
+
   const iconos = {
-  default: require("../../../../assets/images/mapsIcons/icon-default.png"),
-  museo: require("../../../../assets/images/mapsIcons/icon-museo.png"),
-  iglesia: require("../../../../assets/images/mapsIcons/icon-iglesia.png"),
-};
+    default: require("../../../../assets/images/mapsIcons/icon-default.png"),
+    museo: require("../../../../assets/images/mapsIcons/icon-museo.png"),
+    iglesia: require("../../../../assets/images/mapsIcons/icon-iglesia.png"),
+  };
 
   useEffect(() => {
     (async () => {
@@ -89,77 +97,101 @@ const Mapa = () => {
     }
   }, [params.lat, params.lng]);
   const [origin, setorigin] = useState({
-    latitud:-17.783545512919464,
-    longitud:-63.18196406102031,
-  })
-  //-17.783545512919464, -63.18196406102031
+    latitud: -17.783545512919464,
+    longitud: -63.18196406102031,
+  });
+
   return (
-    <View style={{ flex: 1 }}>
-  <MapView
-  provider={PROVIDER_GOOGLE}
-  initialRegion={{
-    latitude: origin.latitud,
-    longitude: origin.longitud,
-    latitudeDelta: 0.09,
-    longitudeDelta: 0.04,
-  }}
-  ref={mapRef}
-  style={styles.map}
-  showsUserLocation={true}
-  followsUserLocation={false}
-  showsMyLocationButton={false}
-  onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
-  customMapStyle={[
-    { featureType: "poi", elementType: "all", stylers: [{ visibility: "off" }] },
-    { featureType: "administrative", elementType: "labels", stylers: [{ visibility: "off" }] },
-    { featureType: "road", elementType: "labels.icon", stylers: [{ visibility: "off" }] },
-    { featureType: "transit", elementType: "all", stylers: [{ visibility: "off" }] },
-  ]}
->
-  {puntos.map((punto) => (
-    <Marker
-      key={punto.PuntoHist_ID}
-      image={iconos[(punto.Tipo as keyof typeof iconos) ?? "default"] || iconos["default"]}
-      coordinate={{
-        latitude: punto.Latitud,
-        longitude: punto.Longitud,
-      }}
-      tracksViewChanges={false}
-      onPress={() =>
-        router.push({
-          pathname: "/puntosInfo",
-          params: {
-            id: punto.PuntoHist_ID,
-            nombre: punto.Nombre,
-          },
-        })
-      }
-    >
-      
-    </Marker>
-  ))}
-</MapView>
+    <SafeAreaProvider>
+      <SafeAreaView style={{ flex: 1 }}>
+        <View style={{ flex: 1 }}>
+          <MapView
+            provider={PROVIDER_GOOGLE}
+            initialRegion={{
+              latitude: origin.latitud,
+              longitude: origin.longitud,
+              latitudeDelta: 0.09,
+              longitudeDelta: 0.04,
+            }}
+            ref={mapRef}
+            style={styles.map}
+            showsUserLocation={true}
+            followsUserLocation={false}
+            showsMyLocationButton={false}
+            onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
+            customMapStyle={[
+              {
+                featureType: "poi",
+                elementType: "all",
+                stylers: [{ visibility: "off" }],
+              },
+              {
+                featureType: "administrative",
+                elementType: "labels",
+                stylers: [{ visibility: "off" }],
+              },
+              {
+                featureType: "road",
+                elementType: "labels.icon",
+                stylers: [{ visibility: "off" }],
+              },
+              {
+                featureType: "transit",
+                elementType: "all",
+                stylers: [{ visibility: "off" }],
+              },
+            ]}
+          >
+            {puntos.map((punto) => (
+              <Marker
+                key={punto.PuntoHist_ID}
+                image={
+                  iconos[(punto.Tipo as keyof typeof iconos) ?? "default"] ||
+                  iconos["default"]
+                }
+                coordinate={{
+                  latitude: punto.Latitud,
+                  longitude: punto.Longitud,
+                }}
+                tracksViewChanges={false}
+                onPress={() =>
+                  router.push({
+                    pathname: "/puntosInfo",
+                    params: {
+                      id: punto.PuntoHist_ID,
+                      nombre: punto.Nombre,
+                    },
+                  })
+                }
+              ></Marker>
+            ))}
+          </MapView>
 
-      <TouchableOpacity
-        style={styles.locateButton}
-        onPress={() => {
-          if (location) {
-            mapRef.current?.animateToRegion({
-              latitude: location.coords.latitude,
-              longitude: location.coords.longitude,
-              latitudeDelta: 0.01,
-              longitudeDelta: 0.01,
-            });
-          }
-        }}
-      >
-        <MaterialIcons name="my-location" size={24} color="#FFF" />
-      </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.locateButton}
+            onPress={() => {
+              if (location) {
+                mapRef.current?.animateToRegion({
+                  latitude: location.coords.latitude,
+                  longitude: location.coords.longitude,
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01,
+                });
+              }
+            }}
+          >
+            <MaterialIcons name="my-location" size={24} color="#FFF" />
+          </TouchableOpacity>
 
-      <TouchableOpacity style={styles.floatingButton} onPress={() => router.push("/libre")}>
-        <MaterialIcons name="notifications" size={24} color="#FFF" />
-      </TouchableOpacity>
-    </View>
+          <TouchableOpacity
+            style={styles.floatingButton}
+            onPress={() => router.push("/libre")}
+          >
+            <MaterialIcons name="notifications" size={24} color="#FFF" />
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 
@@ -201,7 +233,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   markerLabelContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.7)', // Semi-transparent background
+    backgroundColor: "rgba(255, 255, 255, 0.7)", // Semi-transparent background
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 10,
@@ -209,7 +241,7 @@ const styles = StyleSheet.create({
   },
   markerLabelText: {
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
 

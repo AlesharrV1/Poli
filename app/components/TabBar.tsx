@@ -2,7 +2,11 @@ import { View, StyleSheet, LayoutChangeEvent } from "react-native";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import TabbarButton from "./TabbarButton";
 import { useState } from "react";
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 export default function MyTabBar({
   state,
   descriptors,
@@ -13,32 +17,36 @@ export default function MyTabBar({
     height: 100,
   });
   const buttonWidth = dimensions.width / state.routes.length;
-  const onTabbarLayout =(e:LayoutChangeEvent) => {
+  const onTabbarLayout = (e: LayoutChangeEvent) => {
     setDimensions({
       width: e.nativeEvent.layout.width,
       height: e.nativeEvent.layout.height,
-    })
-  }
+    });
+  };
   const tabPositionX = useSharedValue(0);
-  const animateStyle = useAnimatedStyle(()=>{
-    return{
-      transform:[{translateX: tabPositionX.value}],
-    }
-  })
+  const animateStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: tabPositionX.value }],
+    };
+  });
   return (
     <View onLayout={onTabbarLayout} style={styles.tabbar}>
-      <Animated.View style={[animateStyle,{
-        position: "absolute",
-        backgroundColor: "#508D44",
-        borderRadius: 30,
-        marginHorizontal: 17,
-        height:dimensions.height - 24,
-        width: buttonWidth - 35,
-
-      }]}/>
+      <Animated.View
+        style={[
+          animateStyle,
+          {
+            position: "absolute",
+            backgroundColor: "#508D44",
+            borderRadius: 30,
+            marginHorizontal: 17,
+            height: dimensions.height - 24,
+            width: buttonWidth - 35,
+          },
+        ]}
+      />
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
-        const label:string|any=
+        const label: string | any =
           options.tabBarLabel !== undefined
             ? options.tabBarLabel
             : options.title !== undefined
@@ -48,7 +56,9 @@ export default function MyTabBar({
         const isFocused = state.index === index;
 
         const onPress = () => {
-          tabPositionX.value = withSpring(buttonWidth * index, { duration: 1500 });
+          tabPositionX.value = withSpring(buttonWidth * index, {
+            duration: 1500,
+          });
           const event = navigation.emit({
             type: "tabPress",
             target: route.key,
@@ -69,13 +79,13 @@ export default function MyTabBar({
 
         return (
           <TabbarButton
-          key={route.name}
-          onPress={onPress}
-          onLongPress={onLongPress}
-          isFocused={isFocused}
-          routeName={route.name}
-          color={isFocused ? "#FFF" : "#222"}
-          label={label}
+            key={route.name}
+            onPress={onPress}
+            onLongPress={onLongPress}
+            isFocused={isFocused}
+            routeName={route.name}
+            color={isFocused ? "#FFF" : "#222"}
+            label={label}
           />
         );
       })}

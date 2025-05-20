@@ -53,7 +53,7 @@ const TabbarButton: React.FC<TabbarButtonProps> = ({
       onLongPress={onLongPress}
       style={styles.tabbarItem}
     >
-            <Animated.View style={[animatedIconsStyle]}>
+      <Animated.View style={[animatedIconsStyle]}>
         {icon[routeName.split("/")[0].replace(/[/()]/g, "")]?.({
           color: isFocused ? "#FFF" : "#222",
         })}

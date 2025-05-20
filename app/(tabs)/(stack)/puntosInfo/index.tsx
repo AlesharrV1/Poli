@@ -32,7 +32,7 @@ interface PuntoTuristico {
 const PuntosInfo = () => {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  const [punto, setPunto] = useState<PuntoTuristico|null>(null);
+  const [punto, setPunto] = useState<PuntoTuristico | null>(null);
   const [imagenURL, setImagenURL] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -48,7 +48,9 @@ const PuntosInfo = () => {
       try {
         const [puntoRes, imagenRes] = await Promise.all([
           axios.get(`http://${localhost}:3000/api/puntos-turisticos/${id}`),
-          axios.get(`http://${localhost}:3000/api/imagenes/por-punto-turistico/${id}`),
+          axios.get(
+            `http://${localhost}:3000/api/imagenes/por-punto-turistico/${id}`
+          ),
         ]);
 
         setPunto(puntoRes.data);
@@ -134,8 +136,19 @@ const PuntosInfo = () => {
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={handleImagePress}>
-        <Animated.View style={[styles.imageContainer, { height: imageHeight, marginTop: imageMarginTop }]}>
-          {imagenURL && <Image source={{ uri: imagenURL }} style={styles.image} resizeMode="cover" />}
+        <Animated.View
+          style={[
+            styles.imageContainer,
+            { height: imageHeight, marginTop: imageMarginTop },
+          ]}
+        >
+          {imagenURL && (
+            <Image
+              source={{ uri: imagenURL }}
+              style={styles.image}
+              resizeMode="cover"
+            />
+          )}
         </Animated.View>
       </TouchableOpacity>
 
@@ -147,7 +160,12 @@ const PuntosInfo = () => {
         </View>
       )}
 
-      <Animated.ScrollView style={[styles.scroll, { transform: [{ translateY: scrollTranslate }] }]}>
+      <Animated.ScrollView
+        style={[
+          styles.scroll,
+          { transform: [{ translateY: scrollTranslate }] },
+        ]}
+      >
         <View style={styles.infoContainer}>
           <Text style={styles.title}>{punto.Nombre}</Text>
           <Text style={styles.description}>{punto.Descripcion}</Text>
@@ -156,7 +174,9 @@ const PuntosInfo = () => {
         <View style={styles.detailsContainer}>
           <Text style={styles.info}>🕐 Horario: {punto.HorarioServicio}</Text>
           <Text style={styles.info}>💵 Costo: {punto.CostoEntrada}</Text>
-          <Text style={styles.info}>📍 Ubicación: {punto.Localidad}, {punto.Ciudad}</Text>
+          <Text style={styles.info}>
+            📍 Ubicación: {punto.Localidad}, {punto.Ciudad}
+          </Text>
           <Text style={styles.info}>🌍 País: {punto.Pais}</Text>
         </View>
       </Animated.ScrollView>
@@ -168,14 +188,14 @@ const PuntosInfo = () => {
 };
 
 const styles = StyleSheet.create({
-  back:{ 
+  back: {
     backgroundColor: "green",
     padding: 10,
     borderRadius: 20,
     shadowColor: "#000",
     position: "absolute",
     top: 20,
-    left: 20 
+    left: 20,
   },
   container: {
     flex: 1,
@@ -251,4 +271,3 @@ const styles = StyleSheet.create({
 });
 
 export default PuntosInfo;
-

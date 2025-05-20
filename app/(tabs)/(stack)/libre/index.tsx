@@ -1,4 +1,13 @@
-import { View, Text, StyleSheet, Switch, TextInput, FlatList, Pressable, Image } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Switch,
+  TextInput,
+  FlatList,
+  Pressable,
+  Image,
+} from "react-native";
 import React, { useState, useEffect } from "react";
 import { Entypo, FontAwesome6, Foundation, Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
@@ -171,7 +180,9 @@ const Libre = () => {
               <Image
                 source={
                   iconos[
-                    typeof item.Tipo === "string" && (item.Tipo.toLowerCase() === "museo" || item.Tipo.toLowerCase() === "iglesia")
+                    typeof item.Tipo === "string" &&
+                    (item.Tipo.toLowerCase() === "museo" ||
+                      item.Tipo.toLowerCase() === "iglesia")
                       ? (item.Tipo.toLowerCase() as "museo" | "iglesia")
                       : "default"
                   ]
@@ -188,7 +199,7 @@ const Libre = () => {
             <Pressable
               onPress={() =>
                 router.push({
-                  pathname: "mapa",
+                  pathname: "/mapa",
                   params: {
                     lat: item.Latitud,
                     lng: item.Longitud,

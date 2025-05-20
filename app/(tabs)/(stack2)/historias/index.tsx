@@ -74,7 +74,9 @@ export default function HistoriasScreen() {
           >
             <Image source={{ uri: h.imagen_url }} style={styles.imagenCard} />
             <View style={{ flex: 1 }}>
-              <Text style={[styles.subtitulo,{fontSize:10}]}>{h.titulo} </Text>
+              <Text style={[styles.subtitulo, { fontSize: 10 }]}>
+                {h.titulo}{" "}
+              </Text>
               <Text style={styles.fecha}>{h.fecha}</Text>
             </View>
           </TouchableOpacity>
@@ -84,25 +86,22 @@ export default function HistoriasScreen() {
       <View style={{ marginBottom: 10, alignItems: "flex-end" }}>
         <Pressable
           onPress={() => setOrdenAscendente(!ordenAscendente)}
-          style={
-            {
-             backgroundColor:'#3FA53A',
-              padding: 10,
-              borderRadius: 10,
-              margin: 10,
-              alignItems: "center",
-              justifyContent: "center",
-            }
-          }
+          style={{
+            backgroundColor: "#3FA53A",
+            padding: 10,
+            borderRadius: 10,
+            margin: 10,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
-          <Text style={{ fontSize: 15 ,color:'white'}}>{` ${
+          <Text style={{ fontSize: 15, color: "white" }}>{` ${
             ordenAscendente ? "Ascendente ↑" : "Descendente ↓"
           }`}</Text>
         </Pressable>
       </View>
 
       <View style={styles.timelineContainer}>
-        
         <View style={{ flex: 1 }}>
           {normales.map((h) => {
             const fecha = h.fecha || h.hitos_historicos?.[0]?.fecha || "";
