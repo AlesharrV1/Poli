@@ -16,6 +16,7 @@ import MapView, {
   Marker,
   PROVIDER_GOOGLE,
   Region,
+  Polyline
 } from "react-native-maps";
 import * as Location from "expo-location";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -35,6 +36,12 @@ interface imagenes {
   URL: string;
 }
 const Mapa = () => {
+  const GOOGLE_API_KEY = "AIzaSyCA16ht6Gp2Xe2J9gUMQdIS5eusx6TvPs0"; // 🔑 reemplaza con tu API Key real
+  const [rutaCoords, setRutaCoords] = useState<
+    { latitude: number; longitude: number }[]
+  >([]);
+  const [rutaActiva, setRutaActiva] = useState(false);
+
   const localhost = backend;
   const router = useRouter();
   const mapRef = useRef<MapView>(null);
@@ -122,6 +129,81 @@ const Mapa = () => {
     latitud: -17.783545512919464,
     longitud: -63.18196406102031,
   });
+ const obtenerRuta = async () => {
+  if (!location || !puntoSeleccionado) {
+    console.warn("❗ No hay ubicación o punto seleccionado");
+    return;
+  }
+
+  const origen = `${location.coords.latitude},${location.coords.longitude}`;
+  const destino = `${puntoSeleccionado.Latitud},${puntoSeleccionado.Longitud}`;
+  const modo = "walking";
+
+  const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origen}&destination=${destino}&mode=${modo}&key=${GOOGLE_API_KEY}`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    console.log("Respuesta Directions:", data);
+
+    if (data.routes.length) {
+      const puntosRuta = decodePolyline(data.routes[0].overview_polyline.points);
+      setRutaCoords(puntosRuta);
+      setRutaActiva(true);
+      setTimeout(() => {
+        setModalVisible(false); // cerrar el modal después de trazar la ruta
+      }, 300); // pequeño retraso por seguridad
+
+      mapRef.current?.fitToCoordinates(puntosRuta, {
+        edgePadding: { top: 100, right: 50, bottom: 100, left: 50 },
+        animated: true,
+      });
+    } else {
+      console.warn("No se encontró una ruta.");
+    }
+  } catch (error) {
+    console.error("Error al obtener la ruta:", error);
+  }
+};
+
+  const decodePolyline = (
+    encoded: string
+  ): { latitude: number; longitude: number }[] => {
+    let points = [];
+    let index = 0,
+      lat = 0,
+      lng = 0;
+
+    while (index < encoded.length) {
+      let b,
+        shift = 0,
+        result = 0;
+      do {
+        b = encoded.charCodeAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      const dlat = result & 1 ? ~(result >> 1) : result >> 1;
+      lat += dlat;
+
+      shift = 0;
+      result = 0;
+      do {
+        b = encoded.charCodeAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      const dlng = result & 1 ? ~(result >> 1) : result >> 1;
+      lng += dlng;
+
+      points.push({
+        latitude: lat / 1e5,
+        longitude: lng / 1e5,
+      });
+    }
+
+    return points;
+  };
 
   return (
     <SafeAreaProvider>
@@ -192,6 +274,13 @@ const Mapa = () => {
                 }
               ></Marker>
             ))}
+            {rutaActiva && (
+              <Polyline
+                coordinates={rutaCoords}
+                strokeColor="#508D44"
+                strokeWidth={4}
+              />
+            )}
           </MapView>
 
           <TouchableOpacity
@@ -294,10 +383,16 @@ const Mapa = () => {
                       alignItems: "center",
                     }}
                   >
-                    <TouchableOpacity style={styles.btnmodal}>
-                      <Text style={styles.textbtn}>
-                        Como llegar
-                      </Text>
+                    <TouchableOpacity
+                      style={styles.btnmodal}
+                      onPress={() => {
+  console.log("Presionando botón Cómo llegar");
+  console.log("puntoSeleccionado antes de obtenerRuta:", puntoSeleccionado);
+  obtenerRuta();
+}}
+
+                    >
+                      <Text style={styles.textbtn}>Como llegar</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.btnmodal}
@@ -311,15 +406,34 @@ const Mapa = () => {
                         })
                       }
                     >
-                      <Text style={styles.textbtn}>
-                        Ver mas
-                      </Text>
+                      <Text style={styles.textbtn}>Ver mas</Text>
                     </TouchableOpacity>
                   </View>
                 </Pressable>
               </View>
             </TouchableWithoutFeedback>
           </Modal>
+          {rutaActiva && (
+            <TouchableOpacity
+              style={{
+                position: "absolute",
+                bottom: 140,
+                alignSelf: "center",
+                backgroundColor: "#508D44",
+                padding: 10,
+                borderRadius: 20,
+                elevation: 4,
+              }}
+              onPress={() => {
+                setRutaCoords([]);
+                setRutaActiva(false);
+              }}
+            >
+              <Text style={{ color: "white", fontWeight: "bold" }}>
+                Cancelar ruta
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </SafeAreaView>
     </SafeAreaProvider>
