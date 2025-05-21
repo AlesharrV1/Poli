@@ -1,5 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, TouchableOpacity, StyleSheet, Text, Image } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  Text,
+  Image,
+  Modal,
+  Button,
+  Pressable,
+  TouchableWithoutFeedback,
+} from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import MapView, {
   Callout,
@@ -8,12 +18,22 @@ import MapView, {
   Region,
 } from "react-native-maps";
 import * as Location from "expo-location";
-import { MaterialIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import axios from "axios";
 import { usePuntosStore } from "./usePuntosStore";
 import { backend } from "@/app/common/backend";
-
+interface PuntoTuristico {
+  PuntoHist_ID: string;
+  Nombre: string;
+  Latitud: number;
+  Longitud: number;
+  Tipo?: string;
+  imagenes?: imagenes[];
+}
+interface imagenes {
+  URL: string;
+}
 const Mapa = () => {
   const localhost = backend;
   const router = useRouter();
@@ -31,7 +51,9 @@ const Mapa = () => {
     museo: require("../../../../assets/images/mapsIcons/icon-museo.png"),
     iglesia: require("../../../../assets/images/mapsIcons/icon-iglesia.png"),
   };
-
+  const [puntoSeleccionado, setPuntoSeleccionado] =
+    useState<PuntoTuristico | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -154,14 +176,19 @@ const Mapa = () => {
                   longitude: punto.Longitud,
                 }}
                 tracksViewChanges={false}
-                onPress={() =>
-                  router.push({
-                    pathname: "/puntosInfo",
-                    params: {
-                      id: punto.PuntoHist_ID,
-                      nombre: punto.Nombre,
-                    },
-                  })
+                onPress={
+                  // () =>
+                  // router.push({
+                  //   pathname: "/puntosInfo",
+                  //   params: {
+                  //     id: punto.PuntoHist_ID,
+                  //     nombre: punto.Nombre,
+                  //   },
+                  // })
+                  () => {
+                    setPuntoSeleccionado(punto);
+                    setModalVisible(true);
+                  }
                 }
               ></Marker>
             ))}
@@ -189,6 +216,110 @@ const Mapa = () => {
           >
             <MaterialIcons name="notifications" size={24} color="#FFF" />
           </TouchableOpacity>
+          <Modal
+            visible={modalVisible}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setModalVisible(false)}
+          >
+            <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+              <View
+                style={{
+                  flex: 1,
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                {/* Este Pressable evita que el toque se propague al fondo */}
+                <Pressable
+                  onPress={() => {}} // para que el toque no cierre el modal si se toca dentro
+                  style={{
+                    backgroundColor: "white",
+                    borderRadius: 10,
+                    padding: 20,
+                    width: "80%",
+                  }}
+                >
+                  <View
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 17,
+                        fontWeight: "bold",
+                        marginBottom: 10,
+                        // borderColor: "#508D44", //quitear el border
+                        // borderWidth: 1,
+                        width: 200,
+                      }}
+                    >
+                      {puntoSeleccionado?.Nombre}
+                    </Text>
+                    <Pressable onPress={() => setModalVisible(false)}>
+                      <Ionicons
+                        name="close"
+                        size={20}
+                        color="#black"
+                        style={{
+                          backgroundColor: "#e7e7e7",
+                          borderRadius: 50,
+                          padding: 5,
+                        }}
+                      />
+                    </Pressable>
+                  </View>
+                  {puntoSeleccionado?.imagenes?.[0]?.URL ? (
+                    <Image
+                      source={{
+                        uri: puntoSeleccionado.imagenes[0].URL,
+                      }}
+                      style={{ width: "100%", height: 100, borderRadius: 0 }}
+                      resizeMode="cover"
+                    />
+                  ) : null}
+                  <Text>
+                    Tipo: {puntoSeleccionado?.Tipo || "Punto Turistico"}
+                  </Text>
+                  <View
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      gap: 10,
+                      alignItems: "center",
+                    }}
+                  >
+                    <TouchableOpacity style={styles.btnmodal}>
+                      <Text style={styles.textbtn}>
+                        Como llegar
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.btnmodal}
+                      onPress={() =>
+                        router.push({
+                          pathname: "/puntosInfo",
+                          params: {
+                            id: puntoSeleccionado?.PuntoHist_ID,
+                            nombre: puntoSeleccionado?.Nombre,
+                          },
+                        })
+                      }
+                    >
+                      <Text style={styles.textbtn}>
+                        Ver mas
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </Pressable>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
         </View>
       </SafeAreaView>
     </SafeAreaProvider>
@@ -196,6 +327,19 @@ const Mapa = () => {
 };
 
 const styles = StyleSheet.create({
+  textbtn: {
+    color: "white",
+    fontSize: 12,
+  },
+  btnmodal: {
+    marginTop: 10,
+    // marginBottom: 10,
+    alignItems: "center",
+    backgroundColor: "#508D44",
+    paddingVertical: 7,
+    borderRadius: 20,
+    paddingHorizontal: 10,
+  },
   map: {
     width: "100%",
     height: "100%",
