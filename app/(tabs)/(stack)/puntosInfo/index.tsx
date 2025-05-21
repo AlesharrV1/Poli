@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react"; 
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-
 import {
   View,
   Text,
@@ -12,13 +11,16 @@ import {
   Animated,
   Dimensions,
   Pressable,
+  Alert
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import axios from "axios";
 import { backend } from "@/app/common/backend";
 import AntDesign from "@expo/vector-icons/build/AntDesign";
+import { CameraComponent } from '@/app/(tabs)/(stack)/camara';
 
 const { height: screenHeight } = Dimensions.get("window");
+
 interface PuntoTuristico {
   PuntoHist_ID: string;
   Nombre: string;
@@ -31,19 +33,21 @@ interface PuntoTuristico {
   Ciudad: string;
   Pais: string;
 }
+
 const PuntosInfo = () => {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const [punto, setPunto] = useState<PuntoTuristico | null>(null);
-  const [imagenURL, setImagenURL] = useState(null);
+  const [imagenURL, setImagenURL] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [cameraVisible, setCameraVisible] = useState(false);
 
   const [imageHeight] = useState(new Animated.Value(screenHeight * 0.45));
   const [imageMarginTop] = useState(new Animated.Value(0));
   const [scrollTranslate] = useState(new Animated.Value(0));
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const localhost = backend; // Cambia según tu red
+  const localhost = backend;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -61,6 +65,7 @@ const PuntosInfo = () => {
         }
       } catch (error) {
         console.error("Error al cargar datos:", error);
+        Alert.alert("Error", "No se pudieron cargar los datos del punto turístico");
       } finally {
         setLoading(false);
       }
@@ -71,7 +76,6 @@ const PuntosInfo = () => {
 
   const handleImagePress = () => {
     if (!isExpanded) {
-      // Expandir
       Animated.parallel([
         Animated.timing(imageHeight, {
           toValue: screenHeight * 0.6,
@@ -90,7 +94,6 @@ const PuntosInfo = () => {
         }),
       ]).start();
     } else {
-      // Contraer
       Animated.parallel([
         Animated.timing(imageHeight, {
           toValue: screenHeight * 0.45,
@@ -113,9 +116,35 @@ const PuntosInfo = () => {
   };
 
   const handleGoToMap = () => {
-    // Aquí puedes personalizar la navegación
     console.log("Ir al mapa");
-    // router.push('/mapa'); // Si tienes una ruta al mapa
+  };
+
+  const handlePhotoTaken = async (uri: string) => {
+    setCameraVisible(false);
+    try {
+      const formData = new FormData();
+      formData.append('photo', {
+        uri,
+        type: 'image/jpeg',
+        name: 'photo.jpg',
+      } as any);
+
+      const response = await axios.post(
+        `http://${localhost}:3000/api/puntos-turisticos/${id}/upload-photo`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      Alert.alert("Éxito", "Foto subida correctamente");
+      setImagenURL(uri); // Actualiza la vista previa
+    } catch (error) {
+      console.error("Error al subir foto:", error);
+      Alert.alert("Error", "No se pudo subir la foto");
+    }
   };
 
   if (loading) {
@@ -138,72 +167,80 @@ const PuntosInfo = () => {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1 }}>
-        <View style={styles.container}>
-          <TouchableOpacity onPress={handleImagePress}>
-            <Animated.View
+        {cameraVisible ? (
+          <CameraComponent 
+            onClose={() => setCameraVisible(false)}
+            onPhotoTaken={handlePhotoTaken}
+          />
+        ) : (
+          <View style={styles.container}>
+            <TouchableOpacity onPress={handleImagePress}>
+              <Animated.View
+                style={[
+                  styles.imageContainer,
+                  { height: imageHeight, marginTop: imageMarginTop },
+                ]}
+              >
+                {imagenURL ? (
+                  <Image
+                    source={{ uri: imagenURL }}
+                    style={styles.image}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View style={styles.imagePlaceholder}>
+                    <AntDesign name="picture" size={50} color="#ccc" />
+                  </View>
+                )}
+              </Animated.View>
+            </TouchableOpacity>
+
+            {isExpanded && (
+              <View style={styles.mapButtonWrapper}>
+                <TouchableOpacity
+                  style={styles.mapButton}
+                  onPress={handleGoToMap}
+                >
+                  <Text style={styles.mapButtonText}>Ver ruta</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            <Animated.ScrollView
               style={[
-                styles.imageContainer,
-                { height: imageHeight, marginTop: imageMarginTop },
+                styles.scroll,
+                { transform: [{ translateY: scrollTranslate }] },
               ]}
             >
-              {imagenURL && (
-                <Image
-                  source={{ uri: imagenURL }}
-                  style={styles.image}
-                  resizeMode="cover"
-                />
-              )}
-            </Animated.View>
-          </TouchableOpacity>
+              <View style={styles.infoContainer}>
+                <Text style={styles.title}>{punto.Nombre}</Text>
+                <Text style={styles.description}>{punto.Descripcion}</Text>
+              </View>
 
-          {isExpanded && (
-            <View style={styles.mapButtonWrapper}>
-              <TouchableOpacity
-                style={styles.mapButton}
-                onPress={handleGoToMap}
-              >
-                <Text style={styles.mapButtonText}>Ver ruta</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          <Animated.ScrollView
-            style={[
-              styles.scroll,
-              { transform: [{ translateY: scrollTranslate }] },
-            ]}
-          >
-            <View style={styles.infoContainer}>
-              <Text style={styles.title}>{punto.Nombre}</Text>
-              <Text style={styles.description}>{punto.Descripcion}</Text>
-            </View>
-
-            <View style={styles.detailsContainer}>
-              <Text style={styles.info}>
-                🕐 Horario: {punto.HorarioServicio}
-              </Text>
-              <Text style={styles.info}>💵 Costo: {punto.CostoEntrada}</Text>
-              <Text style={styles.info}>
-                📍 Ubicación: {punto.Localidad}, {punto.Ciudad}
-              </Text>
-              <Text style={styles.info}>🌍 País: {punto.Pais}</Text>
-              <Text style={{ fontSize: 20, fontWeight: "bold", marginTop: 20, color: "#000" }}>
-                Galeria
-              </Text>
-              <TouchableOpacity
-                style={{ height: 150, width: 150, backgroundColor: "#e7e7e7",marginTop: 10,display: "flex",alignItems: "center",justifyContent: "center",borderRadius: 20 }}
-              >
-                <AntDesign name="camerao" size={24} color="black" />
-                <Text style={{ fontSize: 12, textAlign: "center",color: "black"}}>
-                  Subir foto
+              <View style={styles.detailsContainer}>
+                <Text style={styles.info}>
+                  🕐 Horario: {punto.HorarioServicio}
                 </Text>
-              </TouchableOpacity>
-            </View>
-          </Animated.ScrollView>
-          <Pressable style={styles.back} onPress={() => router.back()}>
-            <AntDesign name="back" size={24} color="white" />
-          </Pressable>
-        </View>
+                <Text style={styles.info}>💵 Costo: {punto.CostoEntrada}</Text>
+                <Text style={styles.info}>
+                  📍 Ubicación: {punto.Localidad}, {punto.Ciudad}
+                </Text>
+                <Text style={styles.info}>🌍 País: {punto.Pais}</Text>
+                <Text style={styles.galleryTitle}>Galería</Text>
+                <TouchableOpacity
+                  style={styles.uploadButton}
+                  onPress={() => setCameraVisible(true)}
+                >
+                  <AntDesign name="camerao" size={24} color="black" />
+                  <Text style={styles.uploadButtonText}>Subir foto</Text>
+                </TouchableOpacity>
+              </View>
+            </Animated.ScrollView>
+            <Pressable style={styles.back} onPress={() => router.back()}>
+              <AntDesign name="back" size={24} color="white" />
+            </Pressable>
+          </View>
+        )}
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -230,13 +267,19 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: "100%",
-    backgroundColor: "#fff",
+    backgroundColor: "#f0f0f0",
     borderBottomWidth: 2,
     borderColor: "green",
   },
   image: {
     width: "100%",
     height: "100%",
+  },
+  imagePlaceholder: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#e0e0e0",
   },
   scroll: {
     flex: 1,
@@ -270,6 +313,28 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginBottom: 8,
     color: "#000",
+  },
+  galleryTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginTop: 20,
+    color: "#000",
+  },
+  uploadButton: {
+    height: 150,
+    width: 150,
+    backgroundColor: "#e7e7e7",
+    marginTop: 10,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 20,
+  },
+  uploadButtonText: {
+    fontSize: 12,
+    textAlign: "center",
+    color: "black",
+    marginTop: 5,
   },
   mapButtonWrapper: {
     position: "absolute",
