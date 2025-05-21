@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+
 import {
   View,
   Text,
@@ -134,56 +136,76 @@ const PuntosInfo = () => {
   }
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity onPress={handleImagePress}>
-        <Animated.View
-          style={[
-            styles.imageContainer,
-            { height: imageHeight, marginTop: imageMarginTop },
-          ]}
-        >
-          {imagenURL && (
-            <Image
-              source={{ uri: imagenURL }}
-              style={styles.image}
-              resizeMode="cover"
-            />
-          )}
-        </Animated.View>
-      </TouchableOpacity>
-
-      {isExpanded && (
-        <View style={styles.mapButtonWrapper}>
-          <TouchableOpacity style={styles.mapButton} onPress={handleGoToMap}>
-            <Text style={styles.mapButtonText}>Ver ruta</Text>
+    <SafeAreaProvider>
+      <SafeAreaView style={{ flex: 1 }}>
+        <View style={styles.container}>
+          <TouchableOpacity onPress={handleImagePress}>
+            <Animated.View
+              style={[
+                styles.imageContainer,
+                { height: imageHeight, marginTop: imageMarginTop },
+              ]}
+            >
+              {imagenURL && (
+                <Image
+                  source={{ uri: imagenURL }}
+                  style={styles.image}
+                  resizeMode="cover"
+                />
+              )}
+            </Animated.View>
           </TouchableOpacity>
-        </View>
-      )}
 
-      <Animated.ScrollView
-        style={[
-          styles.scroll,
-          { transform: [{ translateY: scrollTranslate }] },
-        ]}
-      >
-        <View style={styles.infoContainer}>
-          <Text style={styles.title}>{punto.Nombre}</Text>
-          <Text style={styles.description}>{punto.Descripcion}</Text>
-        </View>
+          {isExpanded && (
+            <View style={styles.mapButtonWrapper}>
+              <TouchableOpacity
+                style={styles.mapButton}
+                onPress={handleGoToMap}
+              >
+                <Text style={styles.mapButtonText}>Ver ruta</Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
-        <View style={styles.detailsContainer}>
-          <Text style={styles.info}>🕐 Horario: {punto.HorarioServicio}</Text>
-          <Text style={styles.info}>💵 Costo: {punto.CostoEntrada}</Text>
-          <Text style={styles.info}>
-            📍 Ubicación: {punto.Localidad}, {punto.Ciudad}
-          </Text>
-          <Text style={styles.info}>🌍 País: {punto.Pais}</Text>
+          <Animated.ScrollView
+            style={[
+              styles.scroll,
+              { transform: [{ translateY: scrollTranslate }] },
+            ]}
+          >
+            <View style={styles.infoContainer}>
+              <Text style={styles.title}>{punto.Nombre}</Text>
+              <Text style={styles.description}>{punto.Descripcion}</Text>
+            </View>
+
+            <View style={styles.detailsContainer}>
+              <Text style={styles.info}>
+                🕐 Horario: {punto.HorarioServicio}
+              </Text>
+              <Text style={styles.info}>💵 Costo: {punto.CostoEntrada}</Text>
+              <Text style={styles.info}>
+                📍 Ubicación: {punto.Localidad}, {punto.Ciudad}
+              </Text>
+              <Text style={styles.info}>🌍 País: {punto.Pais}</Text>
+              <Text style={{ fontSize: 20, fontWeight: "bold", marginTop: 20, color: "#000" }}>
+                Galeria
+              </Text>
+              <TouchableOpacity
+                style={{ height: 150, width: 150, backgroundColor: "#e7e7e7",marginTop: 10,display: "flex",alignItems: "center",justifyContent: "center",borderRadius: 20 }}
+              >
+                <AntDesign name="camerao" size={24} color="black" />
+                <Text style={{ fontSize: 12, textAlign: "center",color: "black"}}>
+                  Subir foto
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </Animated.ScrollView>
+          <Pressable style={styles.back} onPress={() => router.back()}>
+            <AntDesign name="back" size={24} color="white" />
+          </Pressable>
         </View>
-      </Animated.ScrollView>
-      <Pressable style={styles.back} onPress={() => router.back()}>
-        <AntDesign name="back" size={24} color="white" />
-      </Pressable>
-    </View>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 
