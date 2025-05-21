@@ -13,7 +13,7 @@ import { useHistoriasStore } from "./useHistoriasStore";
 import axios from "axios";
 import { useRouter } from "expo-router";
 import { backend } from "@/app/common/backend";
-
+import { LinearGradient } from "expo-linear-gradient";
 export default function HistoriasScreen() {
   const localhost = backend; // Asegúrate que tu celular esté en la misma red Wi-Fi
 
@@ -108,9 +108,31 @@ export default function HistoriasScreen() {
             const anio = fecha ? new Date(fecha).getFullYear() : "?";
             return (
               <View key={h.id_historia} style={styles.itemContainer}>
-                <View style={styles.añoBurbuja}>
+                <LinearGradient
+                  colors={[
+                    "rgba(255, 0, 0, 1)",
+                    "rgba(128, 255, 0, 1)",
+                    "rgba(1, 255, 1, 1)",
+                  ]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={{
+                    width: 60,
+                    height: 30,
+                    borderTopRightRadius: 25,
+                    borderBottomLeftRadius: 25,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    shadowColor: "#000",
+                    shadowOpacity: 0.1,
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowRadius: 2,
+                    elevation: 3,
+                  }}
+                >
                   <Text style={styles.añoTexto}>{anio}</Text>
-                </View>
+                </LinearGradient>
+
                 <View style={styles.verticalLine} />
                 <TouchableOpacity
                   style={styles.card}
@@ -165,22 +187,22 @@ const styles = StyleSheet.create({
     backgroundColor: "#A8E2A5",
     marginTop: 10,
     marginRight: 14,
-    borderRadius: 4,
+    // borderRadius: 4,
   },
   itemContainer: {
     flexDirection: "row",
     // alignItems: "center",
-    gap: 10,
-    marginBottom: 30,
+    // gap: 10,
+    // marginBottom: 30,
   },
   añoBurbuja: {
     width: 60,
     height: 30,
     backgroundColor: "#3FA53A",
-    borderRadius: 25,
+    borderTopRightRadius: 25,
+    borderBottomLeftRadius: 25,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 10,
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 1 },
@@ -228,5 +250,22 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "black",
     paddingHorizontal: 10,
+  },
+  background: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    height: 300,
+  },
+  button: {
+    padding: 15,
+    alignItems: "center",
+    borderRadius: 5,
+  },
+  text: {
+    backgroundColor: "transparent",
+    fontSize: 15,
+    color: "#fff",
   },
 });

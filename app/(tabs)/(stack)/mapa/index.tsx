@@ -16,7 +16,7 @@ import MapView, {
   Marker,
   PROVIDER_GOOGLE,
   Region,
-  Polyline
+  Polyline,
 } from "react-native-maps";
 import * as Location from "expo-location";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -129,42 +129,44 @@ const Mapa = () => {
     latitud: -17.783545512919464,
     longitud: -63.18196406102031,
   });
- const obtenerRuta = async () => {
-  if (!location || !puntoSeleccionado) {
-    console.warn("❗ No hay ubicación o punto seleccionado");
-    return;
-  }
-
-  const origen = `${location.coords.latitude},${location.coords.longitude}`;
-  const destino = `${puntoSeleccionado.Latitud},${puntoSeleccionado.Longitud}`;
-  const modo = "walking";
-
-  const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origen}&destination=${destino}&mode=${modo}&key=${GOOGLE_API_KEY}`;
-
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-    console.log("Respuesta Directions:", data);
-
-    if (data.routes.length) {
-      const puntosRuta = decodePolyline(data.routes[0].overview_polyline.points);
-      setRutaCoords(puntosRuta);
-      setRutaActiva(true);
-      setTimeout(() => {
-        setModalVisible(false); // cerrar el modal después de trazar la ruta
-      }, 300); // pequeño retraso por seguridad
-
-      mapRef.current?.fitToCoordinates(puntosRuta, {
-        edgePadding: { top: 100, right: 50, bottom: 100, left: 50 },
-        animated: true,
-      });
-    } else {
-      console.warn("No se encontró una ruta.");
+  const obtenerRuta = async () => {
+    if (!location || !puntoSeleccionado) {
+      console.warn("❗ No hay ubicación o punto seleccionado");
+      return;
     }
-  } catch (error) {
-    console.error("Error al obtener la ruta:", error);
-  }
-};
+
+    const origen = `${location.coords.latitude},${location.coords.longitude}`;
+    const destino = `${puntoSeleccionado.Latitud},${puntoSeleccionado.Longitud}`;
+    const modo = "walking";
+
+    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origen}&destination=${destino}&mode=${modo}&key=${GOOGLE_API_KEY}`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      console.log("Respuesta Directions:", data);
+
+      if (data.routes.length) {
+        const puntosRuta = decodePolyline(
+          data.routes[0].overview_polyline.points
+        );
+        setRutaCoords(puntosRuta);
+        setRutaActiva(true);
+        setTimeout(() => {
+          setModalVisible(false); // cerrar el modal después de trazar la ruta
+        }, 300); // pequeño retraso por seguridad
+
+        mapRef.current?.fitToCoordinates(puntosRuta, {
+          edgePadding: { top: 100, right: 50, bottom: 100, left: 50 },
+          animated: true,
+        });
+      } else {
+        console.warn("No se encontró una ruta.");
+      }
+    } catch (error) {
+      console.error("Error al obtener la ruta:", error);
+    }
+  };
 
   const decodePolyline = (
     encoded: string
@@ -386,11 +388,13 @@ const Mapa = () => {
                     <TouchableOpacity
                       style={styles.btnmodal}
                       onPress={() => {
-  console.log("Presionando botón Cómo llegar");
-  console.log("puntoSeleccionado antes de obtenerRuta:", puntoSeleccionado);
-  obtenerRuta();
-}}
-
+                        console.log("Presionando botón Cómo llegar");
+                        console.log(
+                          "puntoSeleccionado antes de obtenerRuta:",
+                          puntoSeleccionado
+                        );
+                        obtenerRuta();
+                      }}
                     >
                       <Text style={styles.textbtn}>Como llegar</Text>
                     </TouchableOpacity>
