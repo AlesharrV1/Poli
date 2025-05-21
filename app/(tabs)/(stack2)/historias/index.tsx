@@ -112,7 +112,7 @@ export default function HistoriasScreen() {
                   colors={[
                     "rgba(255, 0, 0, 1)",
                     "rgba(128, 255, 0, 1)",
-                    "rgba(1, 255, 1, 1)",
+                    "rgb(113, 212, 113)",
                   ]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
