@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+
 import {
   View,
   Text,
@@ -47,7 +49,9 @@ export default function HistoriaDetalleScreen() {
   }
 
   return (
-    <ScrollView style={{ backgroundColor: "#fff" }}>
+    <SafeAreaProvider>
+      <SafeAreaView style={{ flex: 1 }}>
+<ScrollView style={{ backgroundColor: "#fff" }}>
       <TouchableOpacity onPress={() => router.back()} style={styles.volver}>
         <Text style={{ fontSize: 18 }}>⬅ Volver</Text>
       </TouchableOpacity>
@@ -79,6 +83,9 @@ export default function HistoriaDetalleScreen() {
         ))}
       </View>
     </ScrollView>
+      </SafeAreaView>
+    </SafeAreaProvider>
+    
   );
 }
 
