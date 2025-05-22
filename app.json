@@ -4,7 +4,7 @@
     "slug": "poli",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/slide-icon2.png",
+    "icon": "./assets/images/poli.png",
     "scheme": "poli",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -28,7 +28,7 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/slide-icon2.png"
+      "favicon": "./assets/images/poli.png"
     },
     "plugins": [
       "expo-router",
