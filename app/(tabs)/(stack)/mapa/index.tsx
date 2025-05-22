@@ -144,7 +144,7 @@ const Mapa = () => {
     try {
       const response = await fetch(url);
       const data = await response.json();
-      console.log("Respuesta Directions:", data);
+      // console.log("Respuesta Directions:", data);
 
       if (data.routes.length) {
         const puntosRuta = decodePolyline(
@@ -388,11 +388,11 @@ const Mapa = () => {
                     <TouchableOpacity
                       style={styles.btnmodal}
                       onPress={() => {
-                        console.log("Presionando botón Cómo llegar");
-                        console.log(
-                          "puntoSeleccionado antes de obtenerRuta:",
-                          puntoSeleccionado
-                        );
+                        // console.log("Presionando botón Cómo llegar");
+                        // console.log(
+                        //   "puntoSeleccionado antes de obtenerRuta:",
+                        //   puntoSeleccionado
+                        // );
                         obtenerRuta();
                       }}
                     >

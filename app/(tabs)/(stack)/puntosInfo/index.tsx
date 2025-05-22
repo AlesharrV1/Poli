@@ -116,7 +116,8 @@ const PuntosInfo = () => {
   };
 
   const handleGoToMap = () => {
-    console.log("Ir al mapa");
+    // console.log("Ir al mapa");
+    router.back();
   };
 
   const handlePhotoTaken = async (uri: string) => {

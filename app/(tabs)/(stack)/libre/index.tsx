@@ -167,7 +167,7 @@ const Libre = () => {
         return;
       }
       token = (await Notifications.getExpoPushTokenAsync()).data;
-      console.log(token);
+      // console.log(token);
     }else{return alert("Notificaciones no disponibles en emulador");}
     if (Platform.OS === "android") {
       Notifications.setNotificationChannelAsync("default", {
