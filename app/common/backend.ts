@@ -1,1 +1,1 @@
-export const backend :string = '192.168.1.14';
+export const backend :string = '192.168.100.143';

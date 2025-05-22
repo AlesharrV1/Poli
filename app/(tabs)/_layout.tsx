@@ -18,7 +18,7 @@ const Tablayout = () => {
     <Tabs
       // tabBar={props => shouldShowTab ? <TabBar {...props} /> : null}
       screenOptions={{
-        tabBarActiveTintColor: "blue",
+        tabBarActiveTintColor: "green",
         headerShown: false,
       }}
     >
