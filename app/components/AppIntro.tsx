@@ -1,7 +1,8 @@
-// AppIntro.tsx
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import AppIntroSlider from 'react-native-app-intro-slider';
+
 
 type Slide = {
   key: string;
@@ -46,13 +47,34 @@ export default function AppIntro({ onDone }: { onDone: () => void }) {
     );
   };
 
+  const renderNextButton = () => (
+    <View style={styles.buttonCircle}>
+      <Ionicons name="arrow-forward-outline" size={24} color="#fff" />
+    </View>
+  );
+
+  const renderDoneButton = () => (
+    <View style={styles.buttonCircle}>
+      <Ionicons name="checkmark-outline" size={24} color="#fff" />
+    </View>
+  );
+
+  const renderSkipButton = () => (
+    <View style={styles.buttonCircle}>
+      <Ionicons name="close-outline" size={24} color="#fff" />
+    </View>
+  );
+
   return (
     <AppIntroSlider
       data={slides}
       renderItem={renderItem}
       onDone={onDone}
-      showSkipButton
       onSkip={onDone}
+      showSkipButton
+      renderNextButton={renderNextButton}
+      renderDoneButton={renderDoneButton}
+      renderSkipButton={renderSkipButton}
     />
   );
 }
@@ -68,6 +90,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: '#fff',
     marginBottom: 10,
+    textAlign: 'center',
   },
   text: {
     fontSize: 16,
@@ -79,5 +102,13 @@ const styles = StyleSheet.create({
     height: 200,
     marginVertical: 20,
     resizeMode: 'contain',
+  },
+  buttonCircle: {
+    width: 40,
+    height: 40,
+    backgroundColor: 'rgba(0, 0, 0, .3)',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
