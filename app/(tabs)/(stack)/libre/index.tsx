@@ -143,7 +143,7 @@ const Libre = () => {
           body: `Descubre ${item.Nombre} en ${item.Localidad}`,
           data: { id: item.PuntoHist_ID },
         },
-        trigger: { seconds: 5 }, // Notifica en 60 segundos
+        trigger:null, // Notifica en 60 segundos
       });
     } catch (error) {
       console.error("Error al programar la notificación:", error);
