@@ -187,14 +187,32 @@ const PuntosInfo = () => {
                 📍 Ubicación: {punto.Localidad}, {punto.Ciudad}
               </Text>
               <Text style={styles.info}>🌍 País: {punto.Pais}</Text>
-              <Text style={{ fontSize: 20, fontWeight: "bold", marginTop: 20, color: "#000" }}>
+              <Text
+                style={{
+                  fontSize: 20,
+                  fontWeight: "bold",
+                  marginTop: 20,
+                  color: "#000",
+                }}
+              >
                 Galeria
               </Text>
               <TouchableOpacity
-                style={{ height: 150, width: 150, backgroundColor: "#e7e7e7",marginTop: 10,display: "flex",alignItems: "center",justifyContent: "center",borderRadius: 20 }}
+                style={{
+                  height: 150,
+                  width: 150,
+                  backgroundColor: "#e7e7e7",
+                  marginTop: 10,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: 20,
+                }}
               >
                 <AntDesign name="camerao" size={24} color="black" />
-                <Text style={{ fontSize: 12, textAlign: "center",color: "black"}}>
+                <Text
+                  style={{ fontSize: 12, textAlign: "center", color: "black" }}
+                >
                   Subir foto
                 </Text>
               </TouchableOpacity>

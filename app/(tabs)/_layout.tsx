@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Tabs } from "expo-router";
-import { AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons";
+import { AntDesign, Entypo, FontAwesome, Ionicons } from "@expo/vector-icons";
 import TabBar from "@/app/components/TabBar";
 import { usePathname } from "expo-router";
 
@@ -37,6 +37,15 @@ const Tablayout = () => {
           title: "Historias",
           tabBarIcon: ({ color }) => (
             <Ionicons name="book" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="mas"
+        options={{
+          title: "Más",
+          tabBarIcon: ({ color }) => (
+            <Entypo name="circle-with-plus" size={24} color={color} />
           ),
         }}
       />
