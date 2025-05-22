@@ -14,6 +14,10 @@ import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // 👈 Importante
 import { backend } from "@/app/common/backend";
 import { useRouter } from "expo-router";
+import * as Notifications from 'expo-notifications';
+import { Platform } from "react-native";
+import * as Device from 'expo-device';
+
 
 type PuntoTuristico = {
   Tipo: string;
@@ -43,17 +47,30 @@ const getDistanceFromLatLonInMeters = (
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos((lat2 * Math.PI) / 180) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 };
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
+
+
+/*-------------------------------------------------------------------------------------------------------------------------------*/
 const Libre = () => {
   const [isEnabled, setIsEnabled] = useState(false);
-  const [rango, setRango] = useState("30");
+  const [rango, setRango] = useState("50");
   const [puntosCercanos, setPuntosCercanos] = useState<PuntoTuristico[]>([]);
+  const [expoPushToken, setExpoPushToken] = useState('');
   const router = useRouter();
 
   // 🔁 Cargar valor guardado al iniciar
@@ -63,6 +80,9 @@ const Libre = () => {
         setIsEnabled(valor === "true");
       }
     });
+    registerforPushNotificationsAsync().then(token => {
+      if (token) setExpoPushToken(token);
+    });  // Registra el dispositivo para recibir notificaciones
   }, []);
 
   // 💾 Guardar cada vez que se cambie
@@ -100,14 +120,68 @@ const Libre = () => {
           parseFloat(p.Latitud),
           parseFloat(p.Longitud)
         );
-        return distancia <= parseInt(rango || "30");
+        return distancia <= parseInt(rango || "50");
       });
 
       setPuntosCercanos(filtrados);
+      if (filtrados.length > 0) {
+        await schedulePushNotification(filtrados[0]); // Programar notificación para el primer punto
+      }
     } catch (error) {
       console.error("Error al obtener puntos:", error);
     }
   };
+
+/*--------------------------------------------------------------------------------------------------------------------------------- */
+/*                                                    NOTIFICACIONES Y TOKEN                                                        */
+/*--------------------------------------------------------------------------------------------------------------------------------- */
+  const schedulePushNotification = async (item: PuntoTuristico) => {
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "¡Hay un punto turistico cerca de ti!",
+          body: `Descubre ${item.Nombre} en ${item.Localidad}`,
+          data: { id: item.PuntoHist_ID },
+        },
+        trigger: { seconds: 5 }, // Notifica en 60 segundos
+      });
+    } catch (error) {
+      console.error("Error al programar la notificación:", error);
+      alert("Error al programar la notificación");
+    }
+  }
+
+  const registerforPushNotificationsAsync = async () => {
+    let token;
+    if (Device.isDevice) {
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+
+      if (finalStatus !== "granted") {
+        alert("Fallo al obtener el token");
+        return;
+      }
+      token = (await Notifications.getExpoPushTokenAsync()).data;
+      console.log(token);
+    }else{return alert("Notificaciones no disponibles en emulador");}
+    if (Platform.OS === "android") {
+      Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        importance: Notifications.AndroidImportance.HIGH,
+        sound: "default",
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+      });
+    };
+    return token;
+    
+
+  }
 
   return (
     <View style={styles.container}>
@@ -151,7 +225,7 @@ const Libre = () => {
           style={styles.input}
           keyboardType="numeric"
           placeholder="Max 30"
-          maxLength={3}
+          maxLength={4}
           value={rango}
           onChangeText={setRango}
         />
@@ -180,11 +254,11 @@ const Libre = () => {
               <Image
                 source={
                   iconos[
-                    typeof item.Tipo === "string" &&
+                  typeof item.Tipo === "string" &&
                     (item.Tipo.toLowerCase() === "museo" ||
                       item.Tipo.toLowerCase() === "iglesia")
-                      ? (item.Tipo.toLowerCase() as "museo" | "iglesia")
-                      : "default"
+                    ? (item.Tipo.toLowerCase() as "museo" | "iglesia")
+                    : "default"
                   ]
                 }
                 style={{ width: 28, height: 28, marginRight: 8 }}
